@@ -1,46 +1,7 @@
-//import SwiftUI
-//
-//struct HomeView: View {
-//    @StateObject private var authVM = AuthViewModel()
-//    @Environment(\.dismiss) private var dismiss
-//    
-//    var body: some View {
-//        NavigationStack {
-//            VStack(spacing: 20) {
-//                Text("Welcome, \(authVM.email)!")
-//                    .font(.title.bold())
-//                    .padding()
-//                
-//                // Add your home screen content here
-//                
-//                Button(action: {
-//                    Task {
-//                        do {
-//                            await authVM.logout()
-//                            dismiss()
-//                        } catch {
-//                            // Error is handled in AuthViewModel
-//                        }
-//                    }
-//                }) {
-//                    Text("Logout")
-//                        .frame(maxWidth: .infinity)
-//                        .padding()
-//                        .background(Color.red)
-//                        .foregroundColor(.white)
-//                        .cornerRadius(10)
-//                }
-//                .padding(.horizontal)
-//            }
-//            .navigationBarTitle("ExpenseBuddy", displayMode: .large)
-//            .navigationBarBackButtonHidden(true)
-//        }
-//    }
-//}
 import SwiftUI
 
 struct HomeView: View {
-    @StateObject private var authVM = AuthViewModel()
+    @EnvironmentObject var authVM: AuthViewModel
     @State private var showAddExpense = false
     @State private var showEditExpense: Expense?
     @State private var showProfile = false
@@ -169,5 +130,6 @@ struct HomeView: View {
                 alignment: .bottomTrailing
             )
         }
+        .navigationBarBackButtonHidden(true)
     }
 }

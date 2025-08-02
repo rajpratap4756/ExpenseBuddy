@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct LoginView: View {
-    @StateObject private var authVM = AuthViewModel()
+    @EnvironmentObject var authVM: AuthViewModel
     @State private var isEmailValid = true
     @State private var isPasswordValid = true
     @State private var navigateToHome = false
@@ -61,7 +61,7 @@ struct LoginView: View {
                         Task {
                             do {
                                 try await SupabaseAuthService.shared.signIn(email: authVM.email, password: authVM.password)
-                                navigateToHome = true
+                                authVM.isLoggedIn = true
                             } catch {
                                 authVM.errorMessage = "Invalid email or password"
                             }
@@ -85,6 +85,8 @@ struct LoginView: View {
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $navigateToHome) {
                 HomeView()
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                    .animation(.easeInOut(duration: 1.2), value: navigateToHome)
             }
         }
     }

@@ -9,12 +9,17 @@ import SwiftUI
 
 @main
 struct ExpenseBuddyApp: App {
-   
+    @StateObject private var authVM = AuthViewModel()
 
     var body: some Scene {
         WindowGroup {
-            HomeView()
-               
+            if authVM.isLoggedIn {
+                HomeView()
+                    .environmentObject(authVM)
+            } else {
+                LoginView()
+                    .environmentObject(authVM)
+            }
         }
     }
 }
