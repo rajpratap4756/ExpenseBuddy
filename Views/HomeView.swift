@@ -53,9 +53,7 @@ struct HomeView: View {
                 // Top Bar with Profile Button on Right
                 HStack {
                     Spacer()
-                    Button {
-                        showProfile = true
-                    } label: {
+                    NavigationLink(destination: ProfileView(viewModel: authVM)) {
                         Image(systemName: "person.crop.circle.fill")
                             .resizable()
                             .frame(width: 36, height: 36)
@@ -154,9 +152,7 @@ struct HomeView: View {
             .sheet(isPresented: $showAddExpense) {
                 AddExpenseView(viewModel: authVM)
             }
-            .sheet(isPresented: $showProfile) {
-                ProfileView(viewModel: authVM)
-            }
+            
             .overlay(
                 Button(action: {
                     showAddExpense = true
