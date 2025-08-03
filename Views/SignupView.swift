@@ -1,14 +1,13 @@
 import SwiftUI
 
 struct SignupView: View {
-    @StateObject private var authVM = AuthViewModel()
+    @EnvironmentObject var authVM: AuthViewModel
     @State private var isEmailValid = true
     @State private var isPasswordValid = true
     @State private var confirmPassword = ""
     @State private var passwordsMatch = true
     @State private var showOTPView = false
     @State private var otpCode = ""
-    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         VStack(spacing: 20) {
@@ -84,7 +83,7 @@ struct SignupView: View {
                         Task {
                             do {
                                 try await authVM.verifyOTP(token: otpCode)
-                                dismiss()
+                                authVM.isLoggedIn = true
                             } catch {
                                 // Error is already handled in AuthViewModel
                             }
@@ -101,13 +100,11 @@ struct SignupView: View {
                 }
             } else {
                 Button(action: {
-                    if isValidForm {
-                        Task {
-                            do {
-                                _ = try await authVM.signUp()
-                            } catch {
-                                // Error is already handled in AuthViewModel
-                            }
+                    Task {
+                        do {
+                            _ = try await authVM.signUp()
+                        } catch {
+                            // Error is already handled in AuthViewModel
                         }
                     }
                 }) {
@@ -120,17 +117,18 @@ struct SignupView: View {
                 }
                 .disabled(!isValidForm)
             }
+            
             NavigationLink("Already have an account? Login", destination: LoginView())
                 .font(.callout)
                 .foregroundColor(.blue)
         }
         .padding()
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarTitle("Sign Up", displayMode: .large)
     }
     
     private var isValidForm: Bool {
-        isEmailValid && isPasswordValid && passwordsMatch &&
-        !authVM.email.isEmpty && !authVM.password.isEmpty && !confirmPassword.isEmpty
+        !authVM.email.isEmpty && !authVM.password.isEmpty && !confirmPassword.isEmpty &&
+        isEmailValid && isPasswordValid && passwordsMatch
     }
     
     private func isValidEmail(_ email: String) -> Bool {

@@ -14,7 +14,7 @@ struct HomeView: View {
                 // Top Bar with Profile Button on Right
                 HStack {
                     Spacer()
-                    NavigationLink(destination: ProfileView(viewModel: authVM)) {
+                    NavigationLink(destination: ProfileView()) {
                         Image(systemName: "person.crop.circle.fill")
                             .resizable()
                             .frame(width: 36, height: 36)

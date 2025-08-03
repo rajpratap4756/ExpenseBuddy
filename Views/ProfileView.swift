@@ -2,16 +2,15 @@ import SwiftUI
 import PhotosUI
 
 struct ProfileView: View {
-    @Environment(\.presentationMode) var presentationMode
-    @ObservedObject var viewModel: AuthViewModel
-    
+    @EnvironmentObject var authVM: AuthViewModel
+
     @State private var selectedLanguage = "English"
     @State private var selectedTimeZone = "UTC+1"
-    
+
     @State private var showImagePicker = false
     @State private var profileImage: UIImage? = nil
     @State private var selectedItem: PhotosPickerItem?
-    
+
     var body: some View {
         List {
             // MARK: - Profile Header
@@ -34,58 +33,58 @@ struct ProfileView: View {
                         }
                     }
                     .padding(.top)
-                    
+
                     Text("John Doe")
                         .font(.headline)
-                    
+
                     Text("john.doe@example.com")
                         .font(.subheadline)
                         .foregroundColor(.gray)
-                    
+
                     Spacer()
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 .listRowBackground(Color.clear)
             }
-            
+
             // MARK: - Preferences Section
             Section(header: Text("PREFERENCES")) {
                 HStack {
                     Text("Currency Symbol")
                     Spacer()
-                    Picker("", selection: $viewModel.selectedCurrency) {
-                        ForEach(viewModel.availableCurrencies, id: \.self) {
+                    Picker("", selection: $authVM.selectedCurrency) {
+                        ForEach(authVM.availableCurrencies, id: \.self) {
                             Text($0)
                         }
                     }
                     .labelsHidden()
                 }
             }
-            
+
             // MARK: - Account Section
             Section(header: Text("ACCOUNT")) {
                 NavigationLink(destination: PrivacySettingsView()) {
                     Label("Privacy Settings", systemImage: "shield")
                 }
-                
+
                 NavigationLink(destination: SecuritySettingsView()) {
                     Label("Security Settings", systemImage: "lock")
                 }
-                
+
                 NavigationLink(destination: HelpSupportView()) {
                     Label("Help & Support", systemImage: "questionmark.circle")
                 }
-                
+
                 NavigationLink(destination: AboutView()) {
                     Label("About", systemImage: "info.circle")
                 }
             }
-            
+
             // MARK: - Logout Section
             Section {
                 Button(role: .destructive) {
-                    viewModel.logout()
-                    presentationMode.wrappedValue.dismiss()
+                    authVM.logout()
+                    authVM.isLoggedIn = false
                 } label: {
                     HStack {
                         Image(systemName: "arrow.right.square.fill")
@@ -105,7 +104,7 @@ struct ProfileView: View {
                 if let data = try? await newItem?.loadTransferable(type: Data.self),
                    let uiImage = UIImage(data: data) {
                     self.profileImage = uiImage
-                    viewModel.saveProfileImage(image: uiImage) // Optional: for shared use in Home screen
+                    authVM.saveProfileImage(image: uiImage)
                 }
             }
         }

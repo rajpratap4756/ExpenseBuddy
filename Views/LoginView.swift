@@ -4,7 +4,6 @@ struct LoginView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @State private var isEmailValid = true
     @State private var isPasswordValid = true
-    @State private var navigateToHome = false
     
     var body: some View {
         NavigationStack {
@@ -83,11 +82,6 @@ struct LoginView: View {
             }
             .padding()
             .navigationBarHidden(true)
-            .navigationDestination(isPresented: $navigateToHome) {
-                HomeView()
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
-                    .animation(.easeInOut(duration: 1.2), value: navigateToHome)
-            }
         }
     }
     
