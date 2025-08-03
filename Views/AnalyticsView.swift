@@ -8,6 +8,7 @@
 import SwiftUI
 import Charts
 
+// MARK: - Analytics View
 struct AnalyticsView: View {
     @EnvironmentObject var authVM: AuthViewModel
     
@@ -44,7 +45,7 @@ struct AnalyticsView: View {
                     .frame(height: 180)
                 }
                 .padding()
-                .background(Color(.systemGray6))
+                .background(Color.purple.opacity(0.2))
                 .cornerRadius(16)
 
                 // Expense by Category (Pie Chart)
@@ -67,7 +68,7 @@ struct AnalyticsView: View {
                     .frame(height: 180)
                 }
                 .padding()
-                .background(Color(.systemGray6))
+                .background(Color.purple.opacity(0.2))
                 .cornerRadius(16)
 
                 // Summary Cards
@@ -76,15 +77,23 @@ struct AnalyticsView: View {
                     SummaryCard(title: "Average Daily", value: String(format: "%.2f", authVM.averageDailyExpense()))
                     SummaryCard(title: "Highest Expense", value: String(format: "%.2f", authVM.highestExpense()))
                     SummaryCard(title: "Lowest Expense", value: String(format: "%.2f", authVM.lowestExpense()))
-
                 }
             }
             .padding()
         }
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color(hex: "#d6e4ff"), Color(hex: "#fbe0f8")]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+        )
         .navigationTitle("Analytics")
     }
 }
 
+// MARK: - Summary Card View
 struct SummaryCard: View {
     var title: String
     var value: String
@@ -100,8 +109,7 @@ struct SummaryCard: View {
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .background(Color(.systemGray6))
+        .background(Color.purple.opacity(0.2))
         .cornerRadius(12)
     }
 }
-
