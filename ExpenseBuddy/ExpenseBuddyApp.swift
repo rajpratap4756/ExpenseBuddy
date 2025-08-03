@@ -17,7 +17,7 @@ struct ExpenseBuddyApp: App {
                 HomeView()
                     .environmentObject(authVM)
             } else {
-                LoginView()
+                HomeView()
                     .environmentObject(authVM)
             }
         }

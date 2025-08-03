@@ -189,4 +189,5 @@ class AuthViewModel: ObservableObject {
     func saveProfileImage(image: UIImage) {
         self.userProfileImage = image
     }
+    
 }

@@ -13,7 +13,6 @@ struct EditExpenseView: View {
     init(viewModel: AuthViewModel, expense: Expense) {
         self.viewModel = viewModel
         self.originalExpense = expense
-
         _category = State(initialValue: expense.category)
         _amount = State(initialValue: expense.amount)
         _date = State(initialValue: expense.date)
@@ -22,41 +21,97 @@ struct EditExpenseView: View {
 
     var body: some View {
         NavigationView {
-            Form {
-                TextField("Category", text: $category)
-                TextField("Amount", value: $amount, formatter: NumberFormatter())
-                    .keyboardType(.decimalPad)
-                DatePicker("Date", selection: $date, displayedComponents: [.date, .hourAndMinute])
-                Picker("Icon", selection: $iconName) {
-                    Label("Food", systemImage: "fork.knife").tag("fork.knife")
-                    Label("Transport", systemImage: "car").tag("car")
-                    Label("Shopping", systemImage: "bag").tag("bag")
-                    Label("Rent", systemImage: "house").tag("house")
+            ZStack {
+                // 🌈 Background Gradient
+                LinearGradient(
+                    gradient: Gradient(colors: [Color(hex: "#d6e4ff"), Color(hex: "#fbe0f8")]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Section Header
+                        Text("Edit Expense Info")
+                            .font(.headline)
+                            .padding(.top, 16)
+
+                        VStack(spacing: 15) {
+                            TextField("Category", text: $category)
+                                .padding()
+                                .background(Color.white.opacity(0.9))
+                                .cornerRadius(10)
+
+                            TextField("Amount", value: $amount, formatter: NumberFormatter())
+                                .keyboardType(.decimalPad)
+                                .padding()
+                                .background(Color.white.opacity(0.9))
+                                .cornerRadius(10)
+
+                            DatePicker("Date", selection: $date, displayedComponents: [.date, .hourAndMinute])
+                                .padding()
+                                .background(Color.white.opacity(0.9))
+                                .cornerRadius(10)
+
+                            Picker("Category", selection: $iconName) {
+                                Label("Food", systemImage: "fork.knife").tag("fork.knife")
+                                Label("Transport", systemImage: "car").tag("car")
+                                Label("Shopping", systemImage: "bag").tag("bag")
+                                Label("Rent", systemImage: "house").tag("house")
+                                Label("Other", systemImage: "creditcard").tag("creditcard")
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                            .padding()
+                            .background(Color.white.opacity(0.9))
+                            .cornerRadius(10)
+                        }
+                        .padding(.horizontal)
+
+                        // 💾 Save Button
+                        Button(action: {
+                            let updatedExpense = Expense(
+                                id: originalExpense.id,
+                                category: category,
+                                amount: amount,
+                                date: date,
+                                iconName: iconName
+                            )
+                            viewModel.updateExpense(updatedExpense)
+                            viewModel.filterExpenses(by: viewModel.selectedFilter)
+                            dismiss()
+                        }) {
+                            Text("Save Expense")
+                                .foregroundColor(.white)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [Color(hex: "#3b82f6"), Color(hex: "#a855f7")]),
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .cornerRadius(12)
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 10)
+
+                        // ❌ Cancel Button
+                        Button(action: {
+                            dismiss()
+                        }) {
+                            Text("Cancel")
+                                .foregroundColor(.red)
+                                .padding()
+                        }
+
+                        Spacer()
+                    }
                 }
+                .scrollContentBackground(.hidden)
             }
             .navigationTitle("Edit Expense")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        let updatedExpense = Expense(
-                            id: originalExpense.id, // retain original ID
-                            category: category,
-                            amount: amount,
-                            date: date,
-                            iconName: iconName
-                        )
-                        viewModel.updateExpense(updatedExpense)
-                        viewModel.filterExpenses(by: viewModel.selectedFilter)
-                        dismiss()
-                    }
-                }
-            }
         }
     }
 }

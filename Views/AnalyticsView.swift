@@ -10,6 +10,7 @@ import Charts
 
 struct AnalyticsView: View {
     @EnvironmentObject var authVM: AuthViewModel
+    
     let iconToCategory: [String: String] = [
         "fork.knife": "Food",
         "car": "Transport",

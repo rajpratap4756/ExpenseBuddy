@@ -21,7 +21,7 @@ struct ExpenseRow: View {
                     .font(.headline)
                 Text("\(expense.dateString)  •  \(expense.timeString)")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.black.opacity(0.5))
             }
 
             Spacer()
@@ -32,7 +32,7 @@ struct ExpenseRow: View {
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .background(Color(.systemGray6))
+        .background(Color.purple.opacity(0.2))
         .cornerRadius(12)
     }
 }
