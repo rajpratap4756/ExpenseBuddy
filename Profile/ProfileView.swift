@@ -3,10 +3,6 @@ import PhotosUI
 
 struct ProfileView: View {
     @EnvironmentObject var authVM: AuthViewModel
-
-    @State private var selectedLanguage = "English"
-    @State private var selectedTimeZone = "UTC+1"
-
     @State private var showImagePicker = false
     @State private var profileImage: UIImage? = nil
     @State private var selectedItem: PhotosPickerItem?

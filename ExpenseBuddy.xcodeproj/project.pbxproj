@@ -39,6 +39,11 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		E20207CC2E3F7DF80044AA2F /* Profile */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Profile;
+			sourceTree = "<group>";
+		};
 		E2EF53EC2E3AD30900D96228 /* ExpenseBuddy */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = ExpenseBuddy;
@@ -72,16 +77,6 @@
 		E2EF541C2E3AD49600D96228 /* Services */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Services;
-			sourceTree = "<group>";
-		};
-		E2EF541D2E3AD4AE00D96228 /* Utilities */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Utilities;
-			sourceTree = "<group>";
-		};
-		E2EF541E2E3AD4BC00D96228 /* New Folder */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "New Folder";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -120,11 +115,10 @@
 		E2EF53E12E3AD30900D96228 = {
 			isa = PBXGroup;
 			children = (
-				E2EF54192E3AD41100D96228 /* ViewModels */,
 				E2EF54172E3AD37C00D96228 /* Models */,
-				E2EF541E2E3AD4BC00D96228 /* New Folder */,
-				E2EF541D2E3AD4AE00D96228 /* Utilities */,
+				E2EF54192E3AD41100D96228 /* ViewModels */,
 				E2EF541C2E3AD49600D96228 /* Services */,
+				E20207CC2E3F7DF80044AA2F /* Profile */,
 				E2EF541B2E3AD43A00D96228 /* Views */,
 				E2EF53EC2E3AD30900D96228 /* ExpenseBuddy */,
 				E2EF53FD2E3AD30A00D96228 /* ExpenseBuddyTests */,
@@ -167,13 +161,12 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				E20207CC2E3F7DF80044AA2F /* Profile */,
 				E2EF53EC2E3AD30900D96228 /* ExpenseBuddy */,
 				E2EF54172E3AD37C00D96228 /* Models */,
 				E2EF54192E3AD41100D96228 /* ViewModels */,
 				E2EF541B2E3AD43A00D96228 /* Views */,
 				E2EF541C2E3AD49600D96228 /* Services */,
-				E2EF541D2E3AD4AE00D96228 /* Utilities */,
-				E2EF541E2E3AD4BC00D96228 /* New Folder */,
 			);
 			name = ExpenseBuddy;
 			packageProductDependencies = (
