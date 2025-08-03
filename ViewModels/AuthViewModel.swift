@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import UIKit
+import SwiftUI
 
 @MainActor
 class AuthViewModel: ObservableObject {
@@ -21,11 +22,10 @@ class AuthViewModel: ObservableObject {
     @Published var expenses: [Expense] = []
     @Published var filteredExpenses: [Expense] = []
     @Published var selectedFilter: String = "Day"
-    @Published var selectedCurrency: String = "€ (EUR)"
     @Published var userProfileImage: UIImage?
-
-    var availableCurrencies = ["$ (USD)", "€ (EUR)", "₹ (INR)", "£ (GBP)", "¥ (JPY)"]
-
+    
+    @AppStorage("selectedCurrency") var selectedCurrency: String = "$"
+    let availableCurrencies = ["$", "€", "₹", "£", "¥"]
     
     func login() {
         Task {
@@ -90,36 +90,15 @@ class AuthViewModel: ObservableObject {
             expenses.remove(atOffsets: offsets)
         }
 
-        func totalAmount() -> Double {
-            filteredExpenses.reduce(0) { $0 + $1.amount }
+        func formatCurrency(_ amount: Double) -> String {
+            return "\(selectedCurrency)\(String(format: "%.2f", amount))"
         }
         
-        func filterExpenses(by filter: String) {
-            selectedFilter = filter
-            let calendar = Calendar.current
-            let now = Date()
-            
-            switch filter {
-            case "Day":
-                filteredExpenses = expenses.filter { calendar.isDate($0.date, inSameDayAs: now) }
-            case "Week":
-                let weekAgo = calendar.date(byAdding: .day, value: -7, to: now)!
-                filteredExpenses = expenses.filter { $0.date >= weekAgo && $0.date <= now }
-            case "Month":
-                let monthAgo = calendar.date(byAdding: .month, value: -1, to: now)!
-                filteredExpenses = expenses.filter { $0.date >= monthAgo && $0.date <= now }
-            case "Year":
-                let yearAgo = calendar.date(byAdding: .year, value: -1, to: now)!
-                filteredExpenses = expenses.filter { $0.date >= yearAgo && $0.date <= now }
-            default:
-                filteredExpenses = expenses
-            }
-        }
-        func saveProfileImage(image: UIImage) {
-            self.userProfileImage = image
+        func totalAmount() -> String {
+            return formatCurrency(filteredExpenses.reduce(0) { $0 + $1.amount })
         }
         
-        func previousPeriodTotal() -> Double {
+        func previousPeriodTotal() -> String {
             let calendar = Calendar.current
             let now = Date()
             var startDate: Date
@@ -139,11 +118,11 @@ class AuthViewModel: ObservableObject {
                 startDate = calendar.date(byAdding: .year, value: -2, to: now)!
                 endDate = calendar.date(byAdding: .year, value: -1, to: now)!
             default:
-                return 0.0
+                return formatCurrency(0.0)
             }
             
             let previousPeriodExpenses = expenses.filter { $0.date >= startDate && $0.date <= endDate }
-            return previousPeriodExpenses.reduce(0) { $0 + $1.amount }
+            return formatCurrency(previousPeriodExpenses.reduce(0) { $0 + $1.amount })
         }
     
     func expensesGroupedByMonth() -> [(key: String, value: Double)] {
@@ -185,5 +164,29 @@ class AuthViewModel: ObservableObject {
         expenses.map { $0.amount }.min() ?? 0
     }
     
-
+    func filterExpenses(by filter: String) {
+        selectedFilter = filter
+        let calendar = Calendar.current
+        let now = Date()
+        
+        switch filter {
+        case "Day":
+            filteredExpenses = expenses.filter { calendar.isDate($0.date, inSameDayAs: now) }
+        case "Week":
+            let weekAgo = calendar.date(byAdding: .day, value: -7, to: now)!
+            filteredExpenses = expenses.filter { $0.date >= weekAgo && $0.date <= now }
+        case "Month":
+            let monthAgo = calendar.date(byAdding: .month, value: -1, to: now)!
+            filteredExpenses = expenses.filter { $0.date >= monthAgo && $0.date <= now }
+        case "Year":
+            let yearAgo = calendar.date(byAdding: .year, value: -1, to: now)!
+            filteredExpenses = expenses.filter { $0.date >= yearAgo && $0.date <= now }
+        default:
+            filteredExpenses = expenses
+        }
+    }
+    
+    func saveProfileImage(image: UIImage) {
+        self.userProfileImage = image
+    }
 }

@@ -9,7 +9,7 @@ import SwiftUI
 import Charts
 
 struct AnalyticsView: View {
-    @ObservedObject var viewModel: AuthViewModel
+    @EnvironmentObject var authVM: AuthViewModel
     let iconToCategory: [String: String] = [
         "fork.knife": "Food",
         "car": "Transport",
@@ -17,7 +17,6 @@ struct AnalyticsView: View {
         "house": "Rent",
         "creditcard": "Other"
     ]
-
 
     var body: some View {
         ScrollView {
@@ -33,7 +32,7 @@ struct AnalyticsView: View {
                         .foregroundColor(.gray)
 
                     Chart {
-                        ForEach(viewModel.expensesGroupedByMonth(), id: \.key) { month, total in
+                        ForEach(authVM.expensesGroupedByMonth(), id: \.key) { month, total in
                             BarMark(
                                 x: .value("Month", month),
                                 y: .value("Total", total)
@@ -54,7 +53,7 @@ struct AnalyticsView: View {
                         .foregroundColor(.gray)
 
                     Chart {
-                        ForEach(viewModel.expensesGroupedByIcon(), id: \.iconName) { item in
+                        ForEach(authVM.expensesGroupedByIcon(), id: \.iconName) { item in
                             let categoryLabel = iconToCategory[item.iconName] ?? item.iconName
                             SectorMark(
                                 angle: .value("Amount", item.total),
@@ -64,7 +63,6 @@ struct AnalyticsView: View {
                             .foregroundStyle(by: .value("Category", categoryLabel))
                         }
                     }
-                    
                     .frame(height: 180)
                 }
                 .padding()
@@ -73,10 +71,11 @@ struct AnalyticsView: View {
 
                 // Summary Cards
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                    SummaryCard(title: "Total Expenses", value: viewModel.totalAmount())
-                    SummaryCard(title: "Average Daily", value: viewModel.averageDailyExpense())
-                    SummaryCard(title: "Highest Expense", value: viewModel.highestExpense())
-                    SummaryCard(title: "Lowest Expense", value: viewModel.lowestExpense())
+                    SummaryCard(title: "Total Expenses", value: String(format: "%.2f", authVM.totalAmount()))
+                    SummaryCard(title: "Average Daily", value: String(format: "%.2f", authVM.averageDailyExpense()))
+                    SummaryCard(title: "Highest Expense", value: String(format: "%.2f", authVM.highestExpense()))
+                    SummaryCard(title: "Lowest Expense", value: String(format: "%.2f", authVM.lowestExpense()))
+
                 }
             }
             .padding()
@@ -87,14 +86,14 @@ struct AnalyticsView: View {
 
 struct SummaryCard: View {
     var title: String
-    var value: Double
+    var value: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.caption)
                 .foregroundColor(.gray)
-            Text("$\(String(format: "%.2f", value))")
+            Text(value)
                 .font(.headline)
                 .bold()
         }

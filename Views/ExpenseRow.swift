@@ -1,15 +1,13 @@
-//
-//  ExpenseRow.swift
-//  ExpenseBuddy
-//
-//  Created by RajPratapSingh on 01/08/25.
-//
-
 import SwiftUI
+
 struct ExpenseRow: View {
     let expense: Expense
+    let currencySymbol: String // <-- passed in
 
     var body: some View {
+        let formattedAmount = String(format: "%.2f", expense.amount)
+        let displayAmount = "\(currencySymbol)\(formattedAmount)"
+
         HStack {
             Image(systemName: expense.iconName)
                 .resizable()
@@ -25,8 +23,10 @@ struct ExpenseRow: View {
                     .font(.caption)
                     .foregroundColor(.gray)
             }
+
             Spacer()
-            Text("$\(String(format: "%.2f", expense.amount))")
+
+            Text(displayAmount)
                 .font(.headline)
                 .foregroundColor(.blue)
         }

@@ -9,9 +9,13 @@ struct HomeView: View {
     let filters = ["Day", "Week", "Month", "Year"]
 
     var body: some View {
-        NavigationView {
+        let totalAmount = authVM.totalAmount()
+        let previousTotal = authVM.previousPeriodTotal()
+        let period = authVM.selectedFilter.lowercased()
+
+        return NavigationView {
             VStack {
-                // Top Bar with Profile Button on Right
+                // Profile button at top-right
                 HStack {
                     Spacer()
                     NavigationLink(destination: ProfileView()) {
@@ -22,13 +26,13 @@ struct HomeView: View {
                 }
                 .padding(.horizontal)
 
-                // Welcome Text
+                // Welcome message
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Welcome back")
                             .font(.subheadline)
                             .foregroundColor(.gray)
-                        Text("John Doe")
+                        Text("John Doe") // Optionally use authVM.user?.name
                             .font(.title3)
                             .bold()
                     }
@@ -36,14 +40,14 @@ struct HomeView: View {
                 }
                 .padding(.horizontal)
 
-                // Total Expenses Card
-                NavigationLink(destination: AnalyticsView(viewModel: authVM)) {
+                // Total Expense Card
+                NavigationLink(destination: AnalyticsView()) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Total Expenses")
                             .foregroundColor(.white)
                             .font(.subheadline)
 
-                        Text("$\(String(format: "%.2f", authVM.totalAmount()))")
+                        Text(totalAmount)
                             .font(.title)
                             .bold()
                             .foregroundColor(.white)
@@ -52,7 +56,7 @@ struct HomeView: View {
                             Image(systemName: "clock")
                                 .foregroundColor(.white.opacity(0.8))
                                 .font(.caption)
-                            Text("$\(String(format: "%.2f", authVM.previousPeriodTotal())) last \(authVM.selectedFilter.lowercased())")
+                            Text("\(previousTotal) last \(period)")
                                 .font(.caption)
                                 .foregroundColor(.white.opacity(0.8))
                         }
@@ -84,7 +88,7 @@ struct HomeView: View {
                 // Expenses List
                 List {
                     ForEach(authVM.filteredExpenses) { expense in
-                        ExpenseRow(expense: expense)
+                        ExpenseRow(expense: expense, currencySymbol: authVM.selectedCurrency)
                             .onTapGesture {
                                 showEditExpense = expense
                             }
@@ -101,6 +105,7 @@ struct HomeView: View {
                             .listRowSeparator(.hidden)
                     }
                 }
+
                 .listStyle(PlainListStyle())
                 .scrollContentBackground(.hidden)
                 .background(Color.white)
@@ -113,7 +118,6 @@ struct HomeView: View {
             .sheet(isPresented: $showAddExpense) {
                 AddExpenseView(viewModel: authVM)
             }
-            
             .overlay(
                 Button(action: {
                     showAddExpense = true
