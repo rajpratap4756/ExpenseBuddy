@@ -46,10 +46,10 @@ final class ExpenseServiceTests: XCTestCase {
             category: "Transport",
             amount: 15.75,
             date: dateFormatter.string(from: now),
-            iconName: "car",
-            userId: "test-user-id",
-            createdAt: dateFormatter.string(from: now),
-            updatedAt: dateFormatter.string(from: now)
+            icon_name: "car",
+            user_id: "test-user-id",
+            created_at: dateFormatter.string(from: now),
+            updated_at: dateFormatter.string(from: now)
         )
         
         let expense = response.toExpense()
@@ -86,15 +86,15 @@ final class ExpenseServiceTests: XCTestCase {
         let response = ProfileResponse(
             id: "test-user-id",
             email: "test@example.com",
-            firstName: "Jane",
-            lastName: "Smith",
-            phoneNumber: "+1234567890",
-            dateOfBirth: dateFormatter.string(from: now),
-            profileImageUrl: "https://example.com/image.jpg",
+            first_name: "Jane",
+            last_name: "Smith",
+            phone_number: "+1234567890",
+            date_of_birth: dateFormatter.string(from: now),
+            profile_image_url: "https://example.com/image.jpg",
             currency: "€",
             timezone: "UTC",
-            createdAt: dateFormatter.string(from: now),
-            updatedAt: dateFormatter.string(from: now)
+            created_at: dateFormatter.string(from: now),
+            updated_at: dateFormatter.string(from: now)
         )
         
         let profile = response.toProfile()
