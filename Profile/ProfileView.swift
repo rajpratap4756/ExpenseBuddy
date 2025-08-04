@@ -40,11 +40,11 @@ struct ProfileView: View {
                         }
                         .padding(.top)
 
-                        Text("John Doe")
+                        Text(authVM.userProfile?.fullName ?? "User")
                             .font(.headline)
                             .foregroundColor(.black)
 
-                        Text("john.doe@example.com")
+                        Text(authVM.userProfile?.email ?? "No email")
                             .font(.subheadline)
                             .foregroundColor(.white.opacity(0.8))
                     }

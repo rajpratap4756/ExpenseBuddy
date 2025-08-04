@@ -75,7 +75,10 @@ struct EditExpenseView: View {
                                 category: category,
                                 amount: amount,
                                 date: date,
-                                iconName: iconName
+                                iconName: iconName,
+                                userId: originalExpense.userId,
+                                createdAt: originalExpense.createdAt,
+                                updatedAt: originalExpense.updatedAt
                             )
                             viewModel.updateExpense(updatedExpense)
                             viewModel.filterExpenses(by: viewModel.selectedFilter)

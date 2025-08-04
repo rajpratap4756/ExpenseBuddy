@@ -26,7 +26,15 @@ struct HomeView: View {
                 VStack {
                     // Profile button at top-right
                     HStack {
+                        NavigationLink(destination: TestView()) {
+                            Image(systemName: "ladybug.fill")
+                                .resizable()
+                                .foregroundColor(.orange.opacity(0.7))
+                                .frame(width: 30, height: 30)
+                        }
+                        
                         Spacer()
+                        
                         NavigationLink(destination: ProfileView()) {
                             Image(systemName: "person.crop.circle.fill")
                                 .resizable()
@@ -42,7 +50,7 @@ struct HomeView: View {
                             Text("Welcome back")
                                 .font(.subheadline)
                                 .foregroundColor(.black)
-                            Text("John Doe")
+                            Text(authVM.userProfile?.displayName ?? "User")
                                 .font(.title3)
                                 .bold()
                         }

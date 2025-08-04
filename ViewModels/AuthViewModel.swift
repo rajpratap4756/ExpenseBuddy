@@ -23,17 +23,37 @@ class AuthViewModel: ObservableObject {
     @Published var filteredExpenses: [Expense] = []
     @Published var selectedFilter: String = "Day"
     @Published var userProfileImage: UIImage?
+    @Published var userProfile: Profile?
+    @Published var isLoading = false
     
     @AppStorage("selectedCurrency") var selectedCurrency: String = "$"
     let availableCurrencies = ["$", "€", "₹", "£", "¥"]
     
+    private let expenseService = ExpenseService.shared
+    private let profileService = ProfileService.shared
+    
     func login() {
         Task {
             do {
+                print("🔐 Attempting login for email: \(email)")
                 try await SupabaseAuthService.shared.signIn(email: email, password: password)
-
                 isLoggedIn = true
+                print("✅ Login successful!")
+                
+                // Check current user after login
+                if let user = SupabaseAuthService.shared.currentUser {
+                    print("👤 Current user ID: \(user.id.uuidString)")
+                    print("👤 Current user email: \(user.email ?? "No email")")
+                } else {
+                    print("❌ No current user found after login!")
+                }
+                
+                // Load user profile and expenses after successful login
+                print("📱 Loading user data...")
+                await loadUserData()
+                print("✅ User data loaded successfully!")
             } catch {
+                print("❌ Login failed: \(error.localizedDescription)")
                 errorMessage = "Login failed: \(error.localizedDescription)"
             }
         }
@@ -58,6 +78,9 @@ class AuthViewModel: ObservableObject {
             shouldNavigateToLogin = true
             isOTPSent = false
             otpToken = ""
+            
+            // Create user profile after successful OTP verification
+            await createUserProfile()
         } catch {
             errorMessage = "OTP verification failed: \(error.localizedDescription)"
             throw error
@@ -67,28 +90,77 @@ class AuthViewModel: ObservableObject {
     func logout() {
         Task {
             do {
+                print("🚪 Attempting logout...")
                 try await SupabaseAuthService.shared.logout()
                 isLoggedIn = false
+                
+                // Clear local data
+                expenses = []
+                filteredExpenses = []
+                userProfile = nil
+                userProfileImage = nil
+                print("✅ Logout successful! Local data cleared.")
             } catch {
+                print("❌ Logout failed: \(error.localizedDescription)")
                 errorMessage = "Logout failed: \(error.localizedDescription)"
             }
         }
     }
     
+    // MARK: - Expense Management
     func addExpense(category: String, amount: Double, date: Date, iconName: String) {
-            let newExpense = Expense(id: UUID(), category: category, amount: amount, date: date, iconName: iconName)
-            expenses.append(newExpense)
-        }
-
-        func updateExpense(_ updatedExpense: Expense) {
-            if let index = expenses.firstIndex(where: { $0.id == updatedExpense.id }) {
-                expenses[index] = updatedExpense
+        Task {
+            guard let userId = SupabaseAuthService.shared.currentUser?.id.uuidString else {
+                errorMessage = "User not authenticated"
+                return
+            }
+            
+            let newExpense = Expense(category: category, amount: amount, date: date, iconName: iconName, userId: userId)
+            
+            do {
+                let createdExpense = try await expenseService.createExpense(newExpense)
+                expenses.append(createdExpense)
+                filterExpenses(by: selectedFilter)
+            } catch {
+                errorMessage = "Failed to add expense: \(error.localizedDescription)"
             }
         }
+    }
 
-        func deleteExpense(at offsets: IndexSet) {
-            expenses.remove(atOffsets: offsets)
+    func updateExpense(_ updatedExpense: Expense) {
+        Task {
+            do {
+                let updatedExpenseFromDB = try await expenseService.updateExpense(updatedExpense)
+                if let index = expenses.firstIndex(where: { $0.id == updatedExpenseFromDB.id }) {
+                    expenses[index] = updatedExpenseFromDB
+                }
+                filterExpenses(by: selectedFilter)
+            } catch {
+                errorMessage = "Failed to update expense: \(error.localizedDescription)"
+            }
         }
+    }
+
+    func deleteExpense(at offsets: IndexSet) {
+        Task {
+            guard let userId = SupabaseAuthService.shared.currentUser?.id.uuidString else {
+                errorMessage = "User not authenticated"
+                return
+            }
+            
+            for index in offsets {
+                let expense = expenses[index]
+                do {
+                    try await expenseService.deleteExpense(id: expense.id)
+                    expenses.remove(at: index)
+                } catch {
+                    errorMessage = "Failed to delete expense: \(error.localizedDescription)"
+                    break
+                }
+            }
+            filterExpenses(by: selectedFilter)
+        }
+    }
 
         func formatCurrency(_ amount: Double) -> String {
             return "\(selectedCurrency)\(String(format: "%.2f", amount))"
@@ -188,6 +260,209 @@ class AuthViewModel: ObservableObject {
     
     func saveProfileImage(image: UIImage) {
         self.userProfileImage = image
+    }
+    
+    // MARK: - Profile Management
+    func loadUserData() async {
+        guard let userId = SupabaseAuthService.shared.currentUser?.id.uuidString else { 
+            print("❌ No user ID found for loading data")
+            return 
+        }
+        
+        print("👤 Loading data for user ID: \(userId)")
+        print("👤 Current user email: \(SupabaseAuthService.shared.currentUser?.email ?? "No email")")
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            // Load profile
+            print("📋 Fetching user profile...")
+            do {
+                let profile = try await profileService.fetchProfile(for: userId)
+                userProfile = profile
+                selectedCurrency = profile.currency
+                print("✅ Profile loaded: \(profile.fullName) (\(profile.email))")
+            } catch {
+                print("⚠️ Profile fetch failed, checking if profile exists with different data...")
+                // Try to update existing profile with missing data
+                if let existingProfile = try? await profileService.fetchProfileByEmail(email: SupabaseAuthService.shared.currentUser?.email ?? "") {
+                    print("✅ Found existing profile by email, updating...")
+                    let updatedProfile = Profile(
+                        id: existingProfile.id,
+                        email: existingProfile.email,
+                        firstName: existingProfile.firstName.isEmpty ? "User" : existingProfile.firstName,
+                        lastName: existingProfile.lastName.isEmpty ? "Name" : existingProfile.lastName,
+                        phoneNumber: existingProfile.phoneNumber,
+                        dateOfBirth: existingProfile.dateOfBirth,
+                        profileImageUrl: existingProfile.profileImageUrl,
+                        currency: existingProfile.currency,
+                        timezone: existingProfile.timezone
+                    )
+                    let savedProfile = try await profileService.updateProfile(updatedProfile)
+                    userProfile = savedProfile
+                    selectedCurrency = savedProfile.currency
+                    print("✅ Profile updated: \(savedProfile.fullName) (\(savedProfile.email))")
+                } else {
+                    print("❌ No existing profile found, creating new one...")
+                    await createUserProfile()
+                }
+            }
+            
+            // Load expenses
+            print("💰 Fetching user expenses...")
+            var userExpenses: [Expense] = []
+            
+            // Try fetching by user ID first
+            do {
+                userExpenses = try await expenseService.fetchExpenses(for: userId)
+                print("✅ Expenses loaded by user ID: \(userExpenses.count) expenses found")
+            } catch {
+                print("⚠️ Failed to fetch by user ID, trying by email...")
+                // If user ID fails, try by email
+                if let userEmail = SupabaseAuthService.shared.currentUser?.email {
+                    do {
+                        userExpenses = try await expenseService.fetchExpensesByEmail(email: userEmail)
+                        print("✅ Expenses loaded by email: \(userExpenses.count) expenses found")
+                    } catch {
+                        print("❌ Failed to fetch expenses by email too: \(error.localizedDescription)")
+                        throw error
+                    }
+                } else {
+                    print("❌ No user email available for fallback")
+                    throw error
+                }
+            }
+            
+            expenses = userExpenses
+            filterExpenses(by: selectedFilter)
+            
+            // Print some expense details for debugging
+            for (index, expense) in userExpenses.enumerated() {
+                print("   Expense \(index + 1): \(expense.category) - \(expense.amount) - \(expense.date)")
+            }
+        } catch {
+            print("❌ Failed to load user data: \(error.localizedDescription)")
+            print("❌ Error details: \(error)")
+            errorMessage = "Failed to load user data: \(error.localizedDescription)"
+            
+            // Try to create a basic profile as fallback
+            print("🔄 Attempting to create fallback profile...")
+            await createUserProfile()
+        }
+    }
+    
+    func createUserProfile() async {
+        guard let user = SupabaseAuthService.shared.currentUser else { return }
+        
+        do {
+            print("📝 Creating profile for user: \(user.id.uuidString)")
+            let profile = Profile(
+                id: user.id.uuidString,
+                email: user.email ?? "",
+                firstName: "User",
+                lastName: "Name",
+                currency: selectedCurrency
+            )
+            
+            let createdProfile = try await profileService.createProfile(profile)
+            userProfile = createdProfile
+            print("✅ Profile created successfully: \(createdProfile.fullName)")
+        } catch {
+            print("❌ Failed to create user profile: \(error.localizedDescription)")
+            errorMessage = "Failed to create user profile: \(error.localizedDescription)"
+        }
+    }
+    
+    // MARK: - Test Functions
+    func testSupabaseConnection() async {
+        print("🧪 Testing Supabase connection...")
+        
+        do {
+            // Test basic connection
+            let response: [String] = try await SupabaseAuthService.shared.client
+                .from("profiles")
+                .select("id")
+                .limit(1)
+                .execute()
+                .value
+            
+            print("✅ Supabase connection successful! Found \(response.count) records in profiles table")
+        } catch {
+            print("❌ Supabase connection failed: \(error.localizedDescription)")
+            print("❌ This might mean:")
+            print("   1. Database schema is not set up")
+            print("   2. RLS policies are blocking access")
+            print("   3. Supabase credentials are incorrect")
+        }
+    }
+    
+    func debugUserAndExpenses() async {
+        print("🔍 Debugging user and expenses...")
+        
+        // Check current user
+        if let user = SupabaseAuthService.shared.currentUser {
+            print("👤 Current user ID: \(user.id.uuidString)")
+            print("👤 Current user email: \(user.email ?? "No email")")
+        } else {
+            print("❌ No current user found!")
+            return
+        }
+        
+        // Try to get all expenses (for debugging)
+        do {
+            let allExpenses: [ExpenseResponse] = try await SupabaseAuthService.shared.client
+                .from("expenses")
+                .select()
+                .execute()
+                .value
+            
+            print("📊 Found \(allExpenses.count) total expenses in database:")
+            for (index, expense) in allExpenses.enumerated() {
+                print("   Expense \(index + 1): ID=\(expense.id), Category=\(expense.category), Amount=\(expense.amount), UserID=\(expense.user_id)")
+            }
+        } catch {
+            print("❌ Failed to fetch all expenses: \(error.localizedDescription)")
+        }
+    }
+    
+    func updateUserProfile(_ profile: Profile) async {
+        do {
+            let updatedProfile = try await profileService.updateProfile(profile)
+            userProfile = updatedProfile
+            selectedCurrency = updatedProfile.currency
+        } catch {
+            errorMessage = "Failed to update profile: \(error.localizedDescription)"
+        }
+    }
+    
+    func uploadProfileImage(_ image: UIImage) async {
+        guard let userId = SupabaseAuthService.shared.currentUser?.id.uuidString,
+              let imageData = image.jpegData(compressionQuality: 0.8) else { return }
+        
+        do {
+            let imageUrl = try await profileService.uploadProfileImage(userId: userId, imageData: imageData)
+            
+            if var profile = userProfile {
+                profile.profileImageUrl = imageUrl
+                let updatedProfile = try await profileService.updateProfile(profile)
+                userProfile = updatedProfile
+            }
+            
+            userProfileImage = image
+        } catch {
+            errorMessage = "Failed to upload profile image: \(error.localizedDescription)"
+        }
+    }
+    
+    func deleteUserProfile() async {
+        guard let userId = SupabaseAuthService.shared.currentUser?.id.uuidString else { return }
+        
+        do {
+            try await profileService.deleteProfile(id: userId)
+            userProfile = nil
+        } catch {
+            errorMessage = "Failed to delete profile: \(error.localizedDescription)"
+        }
     }
     
 }
