@@ -34,7 +34,7 @@ class OfflineSyncService: ObservableObject {
         // Set initial network status
         let initialPath = networkMonitor.currentPath
         isOnline = initialPath.status == .satisfied
-        print("🌐 Initial network status: \(isOnline ? "Online" : "Offline")")
+        print(" Initial network status: \(isOnline ? "Online" : "Offline")")
         
         networkMonitor.pathUpdateHandler = { [weak self] path in
             DispatchQueue.main.async {
@@ -43,17 +43,17 @@ class OfflineSyncService: ObservableObject {
                 self?.isOnline = newStatus
                 let isNowOnline = self?.isOnline ?? false
                 
-                print("🌐 Network status changed: \(wasOffline ? "Offline" : "Online") -> \(isNowOnline ? "Online" : "Offline")")
-                print("🌐 Path status: \(path.status)")
-                print("🌐 Path is satisfied: \(path.status == .satisfied)")
-                print("🌐 New status: \(newStatus ? "Online" : "Offline")")
+                print(" Network status changed: \(wasOffline ? "Offline" : "Online") -> \(isNowOnline ? "Online" : "Offline")")
+                print(" Path status: \(path.status)")
+                print(" Path is satisfied: \(path.status == .satisfied)")
+                print(" New status: \(newStatus ? "Online" : "Offline")")
                 
                 // Force UI update by triggering objectWillChange
                 self?.objectWillChange.send()
                 
                 // If we just came back online, retry pending syncs
                 if wasOffline && isNowOnline {
-                    print("🔄 Network restored - triggering sync retry")
+                    print(" Network restored - triggering sync retry")
                     Task {
                         await self?.retryPendingProfileSync()
                         await self?.performSync()
@@ -68,35 +68,35 @@ class OfflineSyncService: ObservableObject {
     // MARK: - Profile Sync
     func queueProfileForSync(_ profile: Profile) {
         pendingProfile = profile
-        print("📝 Profile queued for sync: \(profile.email)")
+        print(" Profile queued for sync: \(profile.email)")
     }
     
     private func retryPendingProfileSync() async {
         guard let profile = pendingProfile else { 
-            print("📝 No pending profile to sync")
+            print(" No pending profile to sync")
             return 
         }
         
-        print("🔄 Attempting to sync queued profile...")
+        print(" Attempting to sync queued profile...")
         do {
             // Try to create profile, but if it fails due to duplicate, try to fetch existing
             do {
                 _ = try await ProfileService.shared.createProfile(profile)
                 pendingProfile = nil
-                print("✅ Profile synced successfully after network restored")
+                print(" Profile synced successfully after network restored")
             } catch {
                 // If creation fails due to duplicate, try to fetch the existing profile
                 if error.localizedDescription.contains("duplicate") {
-                    print("📝 Profile already exists, fetching existing profile...")
+                    print(" Profile already exists, fetching existing profile...")
                     let existingProfile = try await ProfileService.shared.fetchProfile(for: profile.id)
-                    print("✅ Existing profile found: \(existingProfile.fullName)")
+                    print(" Existing profile found: \(existingProfile.fullName)")
                     pendingProfile = nil
                 } else {
                     throw error
                 }
             }
         } catch {
-            print("❌ Still failed to sync profile: \(error.localizedDescription)")
+            print(" Still failed to sync profile: \(error.localizedDescription)")
         }
     }
     
@@ -112,14 +112,14 @@ class OfflineSyncService: ObservableObject {
     @MainActor
     func performSync() async {
         guard let userId = SupabaseAuthService.shared.currentUser?.id.uuidString else {
-            print("❌ No user ID available for sync")
+            print(" No user ID available for sync")
             return
         }
         
         isSyncing = true
         syncError = nil
         
-        print("🔄 Starting offline sync...")
+        print(" Starting offline sync...")
         
         // 1. Upload local changes to server
         await uploadLocalChanges(userId: userId)
@@ -129,7 +129,7 @@ class OfflineSyncService: ObservableObject {
         
         // 3. Update sync status
         lastSyncDate = Date()
-        print("✅ Offline sync completed successfully")
+        print(" Offline sync completed successfully")
         
         isSyncing = false
     }
@@ -146,10 +146,10 @@ class OfflineSyncService: ObservableObject {
                 
                 let uploadedExpense = try await expenseService.createExpense(expenseToUpload)
                 coreDataManager.markExpenseAsSynced(id: uploadedExpense.id)
-                print("✅ Uploaded expense: \(expense.category) - \(expense.amount)")
+                print(" Uploaded expense: \(expense.category) - \(expense.amount)")
                 
             } catch {
-                print("❌ Failed to upload expense: \(error.localizedDescription)")
+                print(" Failed to upload expense: \(error.localizedDescription)")
                 // Don't mark as synced if upload failed
             }
         }
@@ -172,11 +172,11 @@ class OfflineSyncService: ObservableObject {
             for expense in newExpenses {
                 coreDataManager.saveExpenseToLocal(expense)
                 coreDataManager.markExpenseAsSynced(id: expense.id)
-                print("✅ Downloaded expense: \(expense.category) - \(expense.amount)")
+                print("Downloaded expense: \(expense.category) - \(expense.amount)")
             }
             
         } catch {
-            print("❌ Failed to download server changes: \(error.localizedDescription)")
+            print("Failed to download server changes: \(error.localizedDescription)")
         }
     }
     
@@ -199,10 +199,10 @@ class OfflineSyncService: ObservableObject {
         let currentPath = networkMonitor.currentPath
         let newStatus = currentPath.status == .satisfied
         
-        print("🔄 Force updating network status: \(isOnline ? "Online" : "Offline") -> \(newStatus ? "Online" : "Offline")")
-        print("🔄 Current path status: \(currentPath.status)")
-        print("🔄 Path is satisfied: \(currentPath.status == .satisfied)")
-        print("🔄 Available interfaces: \(currentPath.availableInterfaces)")
+//        print(" Force updating network status: \(isOnline ? "Online" : "Offline") -> \(newStatus ? "Online" : "Offline")")
+//        print("Current path status: \(currentPath.status)")
+//        print(" Path is satisfied: \(currentPath.status == .satisfied)")
+//        print(" Available interfaces: \(currentPath.availableInterfaces)")
         
         isOnline = newStatus
         objectWillChange.send()
@@ -215,14 +215,14 @@ class OfflineSyncService: ObservableObject {
         let newStatus = currentPath.status == .satisfied
         
         if isOnline != newStatus {
-            print("🌐 Network status updated: \(isOnline ? "Online" : "Offline") -> \(newStatus ? "Online" : "Offline")")
+            print(" Network status updated: \(isOnline ? "Online" : "Offline") -> \(newStatus ? "Online" : "Offline")")
             isOnline = newStatus
             // Force UI update
             objectWillChange.send()
         }
         
-        print("🌐 Current network status: \(isOnline ? "Online" : "Offline")")
-        print("🌐 Path status: \(currentPath.status)")
+        print(" Current network status: \(isOnline ? "Online" : "Offline")")
+        print(" Path status: \(currentPath.status)")
     }
     
     // MARK: - Sync Local to Remote
@@ -233,9 +233,9 @@ class OfflineSyncService: ObservableObject {
             do {
                 let uploadedExpense = try await expenseService.createExpense(expense)
                 coreDataManager.markExpenseAsSynced(id: uploadedExpense.id)
-                print("✅ Uploaded expense: \(expense.category) - \(expense.amount)")
+                print(" Uploaded expense: \(expense.category) - \(expense.amount)")
             } catch {
-                print("❌ Failed to upload expense: \(error.localizedDescription)")
+                print(" Failed to upload expense: \(error.localizedDescription)")
             }
         }
     }
@@ -259,10 +259,10 @@ class OfflineSyncService: ObservableObject {
             for expense in newExpenses {
                 coreDataManager.saveExpenseToLocal(expense)
                 coreDataManager.markExpenseAsSynced(id: expense.id)
-                print("✅ Downloaded expense: \(expense.category) - \(expense.amount)")
+                print(" Downloaded expense: \(expense.category) - \(expense.amount)")
             }
         } catch {
-            print("❌ Failed to download server changes: \(error.localizedDescription)")
+            print(" Failed to download server changes: \(error.localizedDescription)")
         }
     }
     
@@ -321,12 +321,12 @@ class OfflineSyncService: ObservableObject {
     // MARK: - Network Testing
     @MainActor
     func testNetworkConnectivity() async {
-        print("🧪 Testing network connectivity...")
+        print(" Testing network connectivity...")
         
         let currentPath = networkMonitor.currentPath
-        print("🧪 Path status: \(currentPath.status)")
-        print("🧪 Path is satisfied: \(currentPath.status == .satisfied)")
-        print("🧪 Available interfaces: \(currentPath.availableInterfaces)")
+//        print(" Path status: \(currentPath.status)")
+//        print(" Path is satisfied: \(currentPath.status == .satisfied)")
+//        print(" Available interfaces: \(currentPath.availableInterfaces)")
         
         // Try a simple network request to test connectivity
         do {
@@ -334,28 +334,27 @@ class OfflineSyncService: ObservableObject {
             let (_, response) = try await URLSession.shared.data(from: url)
             
             if let httpResponse = response as? HTTPURLResponse {
-                print("🧪 Network test successful: Status \(httpResponse.statusCode)")
+                print(" Network test successful: Status \(httpResponse.statusCode)")
                 // Force update to online if test succeeds
                 if !isOnline {
-                    print("🧪 Forcing status to Online based on successful network test")
+                    print(" Forcing status to Online based on successful network test")
                     isOnline = true
                     objectWillChange.send()
                 }
             }
         } catch {
-            print("🧪 Network test failed: \(error.localizedDescription)")
+            print(" Network test failed: \(error.localizedDescription)")
         }
     }
-    
     func saveExpensesOffline(_ expenses: [Expense]) {
-        do {
-            let data = try JSONEncoder().encode(expenses)
-            UserDefaults.standard.set(data, forKey: "offlineExpenses")
-        } catch {
-            print("Failed to save offline expenses: \(error)")
+            do {
+                let data = try JSONEncoder().encode(expenses)
+                UserDefaults.standard.set(data, forKey: "offlineExpenses")
+            } catch {
+                print("Failed to save offline expenses: \(error)")
+            }
         }
-    }
-
+    
     // MARK: - Cleanup
     func cleanup() {
         networkMonitor.cancel()

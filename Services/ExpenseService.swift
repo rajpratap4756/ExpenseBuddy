@@ -65,12 +65,12 @@ final class ExpenseService: ObservableObject {
     
     // MARK: - Read Expenses
     func fetchExpenses(for userId: String) async throws -> [Expense] {
-        print("🔍 Fetching expenses for user ID: \(userId)")
+        print(" Fetching expenses for user ID: \(userId)")
         isLoading = true
         defer { isLoading = false }
         
         do {
-            print("🔍 Executing Supabase query for expenses table...")
+            print(" Executing Supabase query for expenses table...")
             let response: [ExpenseResponse] = try await client
                 .from("expenses")
                 .select()
@@ -80,23 +80,23 @@ final class ExpenseService: ObservableObject {
                 .value
             
             let expenses = response.map { $0.toExpense() }
-            print("✅ Fetched \(expenses.count) expenses for user ID \(userId)")
+            print(" Fetched \(expenses.count) expenses for user ID \(userId)")
             return expenses
         } catch {
-            print("❌ Failed to fetch expenses: \(error.localizedDescription)")
-            print("❌ Full error: \(error)")
+            print(" Failed to fetch expenses: \(error.localizedDescription)")
+            print("Full error: \(error)")
             errorMessage = "Failed to fetch expenses: \(error.localizedDescription)"
             throw error
         }
     }
     
     func fetchExpensesByEmail(email: String) async throws -> [Expense] {
-        print("🔍 Fetching expenses for email: \(email)")
+        print("Fetching expenses for email: \(email)")
         isLoading = true
         defer { isLoading = false }
         
         do {
-            print("🔍 Executing Supabase query for expenses by email...")
+            print(" Executing Supabase query for expenses by email...")
             let response: [ExpenseResponse] = try await client
                 .from("expenses")
                 .select("*, profiles!inner(email)")
@@ -106,11 +106,11 @@ final class ExpenseService: ObservableObject {
                 .value
             
             let expenses = response.map { $0.toExpense() }
-            print("✅ Fetched \(expenses.count) expenses for email \(email)")
+            print(" Fetched \(expenses.count) expenses for email \(email)")
             return expenses
         } catch {
-            print("❌ Failed to fetch expenses by email: \(error.localizedDescription)")
-            print("❌ Full error: \(error)")
+            print(" Failed to fetch expenses by email: \(error.localizedDescription)")
+            print(" Full error: \(error)")
             errorMessage = "Failed to fetch expenses by email: \(error.localizedDescription)"
             throw error
         }

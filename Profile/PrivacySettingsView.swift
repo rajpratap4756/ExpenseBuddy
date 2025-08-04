@@ -7,7 +7,7 @@ struct PrivacySettingsView: View {
 
     var body: some View {
         ZStack {
-            // 🔵 Gradient Background
+            //  Gradient Background
             LinearGradient(
                 gradient: Gradient(colors: [Color(hex: "#d6e4ff"), Color(hex: "#fbe0f8")]),
                 startPoint: .topLeading,
@@ -34,8 +34,8 @@ struct PrivacySettingsView: View {
                     }
                 }
             }
-            .scrollContentBackground(.hidden) // 🚫 Hide default background
-            .background(Color.clear) // ✅ Let ZStack background show
+            .scrollContentBackground(.hidden) //  Hide default background
+            .background(Color.clear) //  Let ZStack background show
         }
         .navigationTitle("Privacy Settings")
         .navigationBarTitleDisplayMode(.inline)

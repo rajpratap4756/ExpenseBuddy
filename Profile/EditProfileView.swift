@@ -12,7 +12,7 @@ struct EditProfileView: View {
     
     var body: some View {
         ZStack {
-            // 🌈 Background Gradient
+            //  Background Gradient
             LinearGradient(
                 gradient: Gradient(colors: [Color(hex: "#d6e4ff"), Color(hex: "#fbe0f8")]),
                 startPoint: .topLeading,

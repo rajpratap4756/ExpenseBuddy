@@ -10,7 +10,7 @@ struct ProfileView: View {
 
     var body: some View {
         ZStack {
-            // 🔵 Gradient Background
+            //  Gradient Background
             LinearGradient(
                 gradient: Gradient(colors: [Color(hex: "#d6e4ff"), Color(hex: "#fbe0f8")]),
                 startPoint: .topLeading,
@@ -47,7 +47,7 @@ struct ProfileView: View {
 
                            // Spacer()
 
-                            // ✏️ Edit Profile Button
+                            //  Edit Profile Button
                             Button(action: {
                                 showEditProfile = true
                             }) {

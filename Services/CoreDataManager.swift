@@ -31,9 +31,9 @@ class CoreDataManager: ObservableObject {
         if context.hasChanges {
             do {
                 try context.save()
-                print("✅ Core Data saved successfully")
+                print(" Core Data saved successfully")
             } catch {
-                print("❌ Core Data save failed: \(error.localizedDescription)")
+                print(" Core Data save failed: \(error.localizedDescription)")
             }
         }
     }
@@ -71,7 +71,7 @@ class CoreDataManager: ObservableObject {
                 save()
             }
         } catch {
-            print("❌ Failed to update expense in Core Data: \(error)")
+            print("Failed to update expense in Core Data: \(error)")
         }
     }
     
@@ -86,7 +86,7 @@ class CoreDataManager: ObservableObject {
             }
             save()
         } catch {
-            print("❌ Failed to delete expense from Core Data: \(error)")
+            print(" Failed to delete expense from Core Data: \(error)")
         }
     }
     
@@ -113,7 +113,7 @@ class CoreDataManager: ObservableObject {
                 )
             }
         } catch {
-            print("❌ Failed to fetch local expenses: \(error)")
+            print(" Failed to fetch local expenses: \(error)")
             return []
         }
     }
@@ -142,7 +142,7 @@ class CoreDataManager: ObservableObject {
                 )
             }
         } catch {
-            print("❌ Failed to fetch unsynced expenses: \(error)")
+            print(" Failed to fetch unsynced expenses: \(error)")
             return []
         }
     }
@@ -158,7 +158,7 @@ class CoreDataManager: ObservableObject {
                 save()
             }
         } catch {
-            print("❌ Failed to mark expense as synced: \(error)")
+            print(" Failed to mark expense as synced: \(error)")
         }
     }
     
@@ -169,9 +169,9 @@ class CoreDataManager: ObservableObject {
         do {
             try context.execute(deleteRequest)
             save()
-            print("✅ All local data cleared")
+            print("All local data cleared")
         } catch {
-            print("❌ Failed to clear local data: \(error)")
+            print(" Failed to clear local data: \(error)")
         }
     }
 } 

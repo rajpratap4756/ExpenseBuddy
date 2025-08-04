@@ -10,7 +10,7 @@ struct SignupView: View {
 
     var body: some View {
         ZStack {
-            // 🌈 Background Gradient
+            //  Background Gradient
             LinearGradient(
                 gradient: Gradient(colors: [Color(hex: "#d6e4ff"), Color(hex: "#fbe0f8")]),
                 startPoint: .top,
@@ -88,7 +88,7 @@ struct SignupView: View {
                             .textFieldStyle(.roundedBorder)
                             .keyboardType(.numberPad)
 
-                        // 🔘 Verify OTP Button
+                        //  Verify OTP Button
                         Button(action: {
                             Task {
                                 do {
@@ -116,7 +116,7 @@ struct SignupView: View {
                         .opacity(otpCode.isEmpty ? 0.5 : 1)
                     }
                 } else {
-                    // 🔘 Sign Up Button
+                    //  Sign Up Button
                     Button(action: {
                         Task {
                             do {

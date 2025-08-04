@@ -20,7 +20,7 @@ struct AddExpenseView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // 🌈 Background Gradient
+                // Background Gradient
                 LinearGradient(
                     gradient: Gradient(colors: [Color(hex: "#d6e4ff"), Color(hex: "#fbe0f8")]),
                     startPoint: .topLeading,
@@ -28,7 +28,7 @@ struct AddExpenseView: View {
                 )
                 .ignoresSafeArea()
 
-                // 🧾 Form Content
+                //  Form Content
                 ScrollView {
                     VStack(spacing: 20) {
                         // Section Header
@@ -67,7 +67,7 @@ struct AddExpenseView: View {
                         }
                         .padding(.horizontal)
 
-                        // 💾 Save Button
+                        //  Save Button
                         Button(action: {
                             if let amountDouble = Double(amount), !category.isEmpty {
                                 viewModel.addExpense(category: category, amount: amountDouble, date: date, iconName: iconName)
@@ -91,7 +91,7 @@ struct AddExpenseView: View {
                         .padding(.horizontal)
                         .padding(.top, 10)
 
-                        // ❌ Cancel Button
+                        //  Cancel Button
                         Button(action: {
                             presentationMode.wrappedValue.dismiss()
                         }) {

@@ -20,7 +20,7 @@ struct HomeView: View {
 
             return NavigationView {
                 ZStack {
-                    // 🌈 Background Gradient
+                    // Background Gradient
                     LinearGradient(
                         gradient: Gradient(colors: [Color(hex: "#d6e4ff"), Color(hex: "#fbe0f8")]),
                         startPoint: .top,
@@ -56,7 +56,7 @@ struct HomeView: View {
                         }
                         .padding(.horizontal)
 
-                        // 💳 Total Expense Card
+                        // Total Expense Card
                         NavigationLink(destination: AnalyticsView()) {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Total Expenses")

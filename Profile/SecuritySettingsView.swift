@@ -17,7 +17,7 @@ struct SecuritySettingsView: View {
             )
             .ignoresSafeArea()
 
-            // 📋 List with Transparent Background
+            //  List with Transparent Background
             List {
                 Section(header: Text("AUTHENTICATION")) {
                     Toggle("Face ID / Touch ID", isOn: $biometricEnabled)
@@ -41,7 +41,7 @@ struct SecuritySettingsView: View {
                     }
                 }
             }
-            .scrollContentBackground(.hidden) // 👈 Hides default List background
+            .scrollContentBackground(.hidden) //  Hides default List background
             .background(Color.clear)
         }
         .navigationTitle("Security Settings")

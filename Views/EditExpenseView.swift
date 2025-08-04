@@ -30,7 +30,7 @@ struct EditExpenseView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // 🌈 Background Gradient
+                // Background Gradient
                 LinearGradient(
                     gradient: Gradient(colors: [Color(hex: "#d6e4ff"), Color(hex: "#fbe0f8")]),
                     startPoint: .topLeading,
@@ -76,7 +76,7 @@ struct EditExpenseView: View {
                         }
                         .padding(.horizontal)
 
-                        // 💾 Save Button
+                        // Save Button
                         Button(action: {
                             let updatedExpense = Expense(
                                 id: originalExpense.id,
@@ -108,7 +108,7 @@ struct EditExpenseView: View {
                         .padding(.horizontal)
                         .padding(.top, 10)
 
-                        // ❌ Cancel Button
+                        //  Cancel Button
                         Button(action: {
                             dismiss()
                         }) {

@@ -8,7 +8,7 @@ struct LoginView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // 🌈 Background Gradient
+                //  Background Gradient
                 LinearGradient(
                     gradient: Gradient(colors: [Color(hex: "#d6e4ff"), Color(hex: "#fbe0f8")]),
                     startPoint: .top,
@@ -65,7 +65,7 @@ struct LoginView: View {
                             .multilineTextAlignment(.center)
                     }
 
-                    // 🔘 Login Button with Gradient
+                    //  Login Button with Gradient
                     Button(action: {
                         if isValidEmail(authVM.email) && authVM.password.count >= 6 {
                             Task {
