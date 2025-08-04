@@ -31,6 +31,7 @@ class AuthViewModel: ObservableObject {
     
     private let expenseService = ExpenseService.shared
     private let profileService = ProfileService.shared
+    private let offlineSyncService = OfflineSyncService.shared
     
     func login() {
         Task {
@@ -110,57 +111,29 @@ class AuthViewModel: ObservableObject {
     
     // MARK: - Expense Management
     func addExpense(category: String, amount: Double, date: Date, iconName: String) {
-        Task {
-            guard let userId = SupabaseAuthService.shared.currentUser?.id.uuidString else {
-                errorMessage = "User not authenticated"
-                return
-            }
-            
-            let newExpense = Expense(category: category, amount: amount, date: date, iconName: iconName, userId: userId)
-            
-            do {
-                let createdExpense = try await expenseService.createExpense(newExpense)
-                expenses.append(createdExpense)
-                filterExpenses(by: selectedFilter)
-            } catch {
-                errorMessage = "Failed to add expense: \(error.localizedDescription)"
-            }
-        }
+        // Use offline-first approach
+        let newExpense = offlineSyncService.addExpenseOffline(category: category, amount: amount, date: date, iconName: iconName)
+        expenses.append(newExpense)
+        filterExpenses(by: selectedFilter)
     }
 
     func updateExpense(_ updatedExpense: Expense) {
-        Task {
-            do {
-                let updatedExpenseFromDB = try await expenseService.updateExpense(updatedExpense)
-                if let index = expenses.firstIndex(where: { $0.id == updatedExpenseFromDB.id }) {
-                    expenses[index] = updatedExpenseFromDB
-                }
-                filterExpenses(by: selectedFilter)
-            } catch {
-                errorMessage = "Failed to update expense: \(error.localizedDescription)"
-            }
+        // Use offline-first approach
+        offlineSyncService.updateExpenseOffline(updatedExpense)
+        if let index = expenses.firstIndex(where: { $0.id == updatedExpense.id }) {
+            expenses[index] = updatedExpense
         }
+        filterExpenses(by: selectedFilter)
     }
 
     func deleteExpense(at offsets: IndexSet) {
-        Task {
-            guard let userId = SupabaseAuthService.shared.currentUser?.id.uuidString else {
-                errorMessage = "User not authenticated"
-                return
-            }
-            
-            for index in offsets {
-                let expense = expenses[index]
-                do {
-                    try await expenseService.deleteExpense(id: expense.id)
-                    expenses.remove(at: index)
-                } catch {
-                    errorMessage = "Failed to delete expense: \(error.localizedDescription)"
-                    break
-                }
-            }
-            filterExpenses(by: selectedFilter)
+        // Use offline-first approach
+        for index in offsets {
+            let expense = expenses[index]
+            offlineSyncService.deleteExpenseOffline(id: expense.id)
+            expenses.remove(at: index)
         }
+        filterExpenses(by: selectedFilter)
     }
 
         func formatCurrency(_ amount: Double) -> String {
@@ -275,6 +248,9 @@ class AuthViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         
+        // Check network status first
+        await offlineSyncService.checkNetworkStatus()
+        
         // Add a small delay to show loading state
         try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
         
@@ -308,40 +284,39 @@ class AuthViewModel: ObservableObject {
                     print("✅ Profile updated: \(savedProfile.fullName) (\(savedProfile.email))")
                 } else {
                     print("❌ No existing profile found, creating new one...")
-                    await createUserProfile()
-                }
-            }
-            
-            // Load expenses
-            print("💰 Fetching user expenses...")
-            var userExpenses: [Expense] = []
-            
-            // Try fetching by user ID first
-            do {
-                userExpenses = try await expenseService.fetchExpenses(for: userId)
-                print("✅ Expenses loaded by user ID: \(userExpenses.count) expenses found")
-            } catch {
-                print("⚠️ Failed to fetch by user ID, trying by email...")
-                // If user ID fails, try by email
-                if let userEmail = SupabaseAuthService.shared.currentUser?.email {
+                    // Check if profile already exists by trying to create it
                     do {
-                        userExpenses = try await expenseService.fetchExpensesByEmail(email: userEmail)
-                        print("✅ Expenses loaded by email: \(userExpenses.count) expenses found")
+                        await createUserProfile()
                     } catch {
-                        print("❌ Failed to fetch expenses by email too: \(error.localizedDescription)")
-                        throw error
+                        // If creation fails, the profile might already exist
+                        print("⚠️ Profile creation failed, profile might already exist")
+                        // Don't queue for sync if creation failed - it might already exist
                     }
-                } else {
-                    print("❌ No user email available for fallback")
-                    throw error
                 }
             }
             
-            expenses = userExpenses
+            // Load expenses with offline-first approach
+            print("💰 Loading expenses...")
+            if offlineSyncService.isOnline {
+                // Try to sync and get latest data
+                do {
+                    await offlineSyncService.performSync()
+                    print("✅ Sync completed successfully")
+                } catch {
+                    print("⚠️ Sync failed, continuing with local data: \(error.localizedDescription)")
+                }
+            } else {
+                print("📱 Offline mode - using local data only")
+            }
+            
+            // Load from local storage
+            let localExpenses = offlineSyncService.loadExpensesOffline()
+            expenses = localExpenses
             filterExpenses(by: selectedFilter)
+            print("✅ Loaded \(expenses.count) expenses (offline-first)")
             
             // Print some expense details for debugging
-            for (index, expense) in userExpenses.enumerated() {
+            for (index, expense) in localExpenses.enumerated() {
                 print("   Expense \(index + 1): \(expense.category) - \(expense.amount) - \(expense.date)")
             }
         } catch {
@@ -373,7 +348,24 @@ class AuthViewModel: ObservableObject {
             print("✅ Profile created successfully: \(createdProfile.fullName)")
         } catch {
             print("❌ Failed to create user profile: \(error.localizedDescription)")
-            errorMessage = "Failed to create user profile: \(error.localizedDescription)"
+            
+            // Only queue for sync if it's not a duplicate error
+            if !error.localizedDescription.contains("duplicate") {
+                errorMessage = "Failed to create user profile: \(error.localizedDescription)"
+                // --- Queue for retry if network error ---
+                if let urlError = error as? URLError, urlError.code == .notConnectedToInternet || urlError.code == .timedOut || urlError.code == .networkConnectionLost || urlError.code == .cancelled {
+                    OfflineSyncService.shared.queueProfileForSync(Profile(
+                        id: user.id.uuidString,
+                        email: user.email ?? "",
+                        firstName: "User",
+                        lastName: "Name",
+                        currency: selectedCurrency
+                    ))
+                    print("⏳ Profile queued for sync when network returns")
+                }
+            } else {
+                print("📝 Profile already exists, not queuing for sync")
+            }
         }
     }
     
@@ -472,6 +464,13 @@ class AuthViewModel: ObservableObject {
     // MARK: - Manual Refresh
     func refreshData() async {
         print("🔄 Manual refresh triggered")
+        await loadUserData()
+    }
+    
+    // MARK: - Manual Sync
+    func manualSync() async {
+        print("🔄 Manual sync triggered")
+        await offlineSyncService.performSync()
         await loadUserData()
     }
     

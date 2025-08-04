@@ -7,6 +7,14 @@ struct AddExpenseView: View {
     @State private var category = ""
     @State private var amount = ""
     @State private var date = Date()
+    
+    // Date range to prevent future dates
+    private var dateRange: ClosedRange<Date> {
+        let calendar = Calendar.current
+        let startDate = calendar.date(byAdding: .year, value: -10, to: Date()) ?? Date()
+        let endDate = Date() // Today is the maximum date
+        return startDate...endDate
+    }
     @State private var iconName = "fork.knife"
 
     var body: some View {
@@ -40,7 +48,7 @@ struct AddExpenseView: View {
                                 .background(Color.white.opacity(0.9))
                                 .cornerRadius(10)
 
-                            DatePicker("Date", selection: $date, displayedComponents: [.date, .hourAndMinute])
+                            DatePicker("Date", selection: $date, in: dateRange, displayedComponents: [.date, .hourAndMinute])
                                 .padding()
                                 .background(Color.white.opacity(0.9))
                                 .cornerRadius(10)

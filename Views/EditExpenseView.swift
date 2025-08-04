@@ -9,6 +9,14 @@ struct EditExpenseView: View {
     @State private var amount: Double
     @State private var date: Date
     @State private var iconName: String
+    
+    // Date range to prevent future dates
+    private var dateRange: ClosedRange<Date> {
+        let calendar = Calendar.current
+        let startDate = calendar.date(byAdding: .year, value: -10, to: Date()) ?? Date()
+        let endDate = Date() // Today is the maximum date
+        return startDate...endDate
+    }
 
     init(viewModel: AuthViewModel, expense: Expense) {
         self.viewModel = viewModel
@@ -49,7 +57,7 @@ struct EditExpenseView: View {
                                 .background(Color.white.opacity(0.9))
                                 .cornerRadius(10)
 
-                            DatePicker("Date", selection: $date, displayedComponents: [.date, .hourAndMinute])
+                            DatePicker("Date", selection: $date, in: dateRange, displayedComponents: [.date, .hourAndMinute])
                                 .padding()
                                 .background(Color.white.opacity(0.9))
                                 .cornerRadius(10)

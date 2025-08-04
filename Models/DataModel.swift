@@ -94,7 +94,7 @@ struct Profile: Identifiable, Codable {
     }
     
     var displayName: String {
-        return "\(firstName) \(lastName.prefix(1))."
+        return "\(firstName) \(lastName)"
     }
 }
 

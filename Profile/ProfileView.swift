@@ -47,6 +47,18 @@ struct ProfileView: View {
                         Text(authVM.userProfile?.email ?? "No email")
                             .font(.subheadline)
                             .foregroundColor(.black.opacity(0.8))
+                        
+                        // Edit Profile Button
+                        NavigationLink(destination: EditProfileView()) {
+                            Text("Edit Profile")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.blue.opacity(0.8))
+                                .cornerRadius(8)
+                        }
+                        .disabled(authVM.userProfile == nil)
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
                     .listRowBackground(Color.clear)

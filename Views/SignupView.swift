@@ -150,6 +150,7 @@ struct SignupView: View {
             .padding()
         }
         .navigationBarTitle("Sign Up", displayMode: .large)
+        .navigationBarHidden(true)
     }
 
     private var isValidForm: Bool {

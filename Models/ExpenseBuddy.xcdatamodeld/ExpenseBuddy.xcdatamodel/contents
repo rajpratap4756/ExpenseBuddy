@@ -3,9 +3,13 @@
     <entity name="ExpenseEntity" representedClassName="ExpenseEntity" syncable="YES" codeGenerationType="class">
         <attribute name="amount" optional="NO" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="category" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="date" optional="NO" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="iconName" optional="YES" attributeType="String"/>
         <attribute name="id" optional="NO" attributeType="String"/>
         <attribute name="note" optional="YES" attributeType="String"/>
         <attribute name="syncStatus" optional="NO" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="updatedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="userId" optional="YES" attributeType="String"/>
     </entity>
 </model>
