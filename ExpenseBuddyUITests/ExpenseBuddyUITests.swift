@@ -10,31 +10,72 @@ import XCTest
 final class ExpenseBuddyUITests: XCTestCase {
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
+    override func tearDownWithError() throws {}
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testLoginFlow() throws {
         let app = XCUIApplication()
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        // Assuming "LoginView" is shown by default
+        let emailTextField = app.textFields["Email"]
+        let passwordSecureField = app.secureTextFields["Password"]
+        let loginButton = app.buttons["Login"]
+
+        XCTAssertTrue(emailTextField.waitForExistence(timeout: 5))
+        XCTAssertTrue(passwordSecureField.exists)
+        XCTAssertTrue(loginButton.exists)
+
+        emailTextField.tap()
+        emailTextField.typeText("testuser@example.com")
+
+        passwordSecureField.tap()
+        passwordSecureField.typeText("password123")
+
+        loginButton.tap()
+
+        // Expect to land on Home screen
+        let profileIcon = app.buttons["ProfileIcon"] // add accessibilityIdentifier in ProfileView
+        XCTAssertTrue(profileIcon.waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testAddExpenseFlow() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        // Simulate already logged in state or reuse login code above
+
+        let addButton = app.buttons["AddExpenseButton"] // set this identifier in your Add Expense button
+        XCTAssertTrue(addButton.waitForExistence(timeout: 5))
+
+        addButton.tap()
+
+        let titleField = app.textFields["ExpenseTitle"]
+        let amountField = app.textFields["ExpenseAmount"]
+        let saveButton = app.buttons["SaveExpense"]
+
+        XCTAssertTrue(titleField.waitForExistence(timeout: 5))
+
+        titleField.tap()
+        titleField.typeText("Groceries")
+
+        amountField.tap()
+        amountField.typeText("250")
+
+        saveButton.tap()
+
+        // Verify if the expense appears in the list
+        let newExpenseCell = app.staticTexts["Groceries"]
+        XCTAssertTrue(newExpenseCell.waitForExistence(timeout: 5))
     }
 
     @MainActor
     func testLaunchPerformance() throws {
         if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
-            // This measures how long it takes to launch your application.
             measure(metrics: [XCTApplicationLaunchMetric()]) {
                 XCUIApplication().launch()
             }

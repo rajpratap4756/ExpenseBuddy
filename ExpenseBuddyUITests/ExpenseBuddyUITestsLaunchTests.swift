@@ -18,15 +18,17 @@ final class ExpenseBuddyUITestsLaunchTests: XCTestCase {
     }
 
     @MainActor
-    func testLaunch() throws {
+    func testLaunchAndLoginScreenDisplayed() throws {
         let app = XCUIApplication()
         app.launch()
 
-        // Insert steps here to perform after app launch but before taking a screenshot,
-        // such as logging into a test account or navigating somewhere in the app
+        // Check if Login screen is shown
+        let loginTitle = app.staticTexts["Login"]
+        XCTAssertTrue(loginTitle.exists, "Login screen is not displayed")
 
+        // Screenshot after launch
         let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = "Launch Screen"
+        attachment.name = "Launch Screen - Login"
         attachment.lifetime = .keepAlways
         add(attachment)
     }
