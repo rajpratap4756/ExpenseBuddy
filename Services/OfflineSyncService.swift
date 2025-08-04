@@ -347,6 +347,15 @@ class OfflineSyncService: ObservableObject {
         }
     }
     
+    func saveExpensesOffline(_ expenses: [Expense]) {
+        do {
+            let data = try JSONEncoder().encode(expenses)
+            UserDefaults.standard.set(data, forKey: "offlineExpenses")
+        } catch {
+            print("Failed to save offline expenses: \(error)")
+        }
+    }
+
     // MARK: - Cleanup
     func cleanup() {
         networkMonitor.cancel()

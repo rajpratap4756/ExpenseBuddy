@@ -70,5 +70,7 @@ final class SupabaseAuthService: ObservableObject {
     func getCurrentSession() async throws -> Session? {
         return try await client.auth.session
     }
+    
+    
 }
 

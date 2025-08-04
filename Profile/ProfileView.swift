@@ -6,6 +6,7 @@ struct ProfileView: View {
     @State private var showImagePicker = false
     @State private var profileImage: UIImage? = nil
     @State private var selectedItem: PhotosPickerItem?
+    @State private var showEditProfile = false
 
     var body: some View {
         ZStack {
@@ -17,7 +18,6 @@ struct ProfileView: View {
             )
             .ignoresSafeArea()
 
-            // 📋 List with transparent background
             List {
                 // MARK: - Profile Header
                 Section(header: Text("PROFILE").foregroundColor(.black)) {
@@ -40,25 +40,37 @@ struct ProfileView: View {
                         }
                         .padding(.top)
 
-                        Text(authVM.userProfile?.fullName ?? "User")
-                            .font(.headline)
-                            .foregroundColor(.black)
+                        HStack(spacing: 8) {
+                            Text(authVM.userProfile?.fullName ?? "User")
+                                .font(.headline)
+                                .foregroundColor(.black)
+
+                           // Spacer()
+
+                            // ✏️ Edit Profile Button
+                            Button(action: {
+                                showEditProfile = true
+                            }) {
+                                Image(systemName: "pencil.circle.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.title3)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            // Hidden navigation link
+                            .background(
+                                NavigationLink(
+                                    destination: EditProfileView(),
+                                    isActive: $showEditProfile
+                                ) {
+                                    EmptyView()
+                                }
+                                .hidden()
+                            )
+                        }
 
                         Text(authVM.userProfile?.email ?? "No email")
                             .font(.subheadline)
                             .foregroundColor(.black.opacity(0.8))
-                        
-                        // Edit Profile Button
-                        NavigationLink(destination: EditProfileView()) {
-                            Text("Edit Profile")
-                                .font(.caption)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(Color.blue.opacity(0.8))
-                                .cornerRadius(8)
-                        }
-                        .disabled(authVM.userProfile == nil)
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
                     .listRowBackground(Color.clear)
@@ -127,15 +139,5 @@ struct ProfileView: View {
         }
         .navigationTitle("Profile")
         .navigationBarTitleDisplayMode(.inline)
-        .photosPicker(isPresented: $showImagePicker, selection: $selectedItem, matching: .images)
-        .onChange(of: selectedItem) { newItem in
-            Task {
-                if let data = try? await newItem?.loadTransferable(type: Data.self),
-                   let uiImage = UIImage(data: data) {
-                    self.profileImage = uiImage
-                    authVM.saveProfileImage(image: uiImage)
-                }
-            }
-        }
     }
 }
