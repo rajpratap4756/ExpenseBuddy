@@ -46,7 +46,7 @@ struct ProfileView: View {
 
                         Text(authVM.userProfile?.email ?? "No email")
                             .font(.subheadline)
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundColor(.black.opacity(0.8))
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
                     .listRowBackground(Color.clear)

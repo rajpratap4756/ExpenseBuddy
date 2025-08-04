@@ -79,8 +79,9 @@ class AuthViewModel: ObservableObject {
             isOTPSent = false
             otpToken = ""
             
-            // Create user profile after successful OTP verification
+            // Create user profile and load data after successful OTP verification
             await createUserProfile()
+            await loadUserData()
         } catch {
             errorMessage = "OTP verification failed: \(error.localizedDescription)"
             throw error
@@ -274,6 +275,9 @@ class AuthViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         
+        // Add a small delay to show loading state
+        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+        
         do {
             // Load profile
             print("📋 Fetching user profile...")
@@ -463,6 +467,12 @@ class AuthViewModel: ObservableObject {
         } catch {
             errorMessage = "Failed to delete profile: \(error.localizedDescription)"
         }
+    }
+    
+    // MARK: - Manual Refresh
+    func refreshData() async {
+        print("🔄 Manual refresh triggered")
+        await loadUserData()
     }
     
 }

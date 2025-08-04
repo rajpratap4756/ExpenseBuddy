@@ -26,13 +26,6 @@ struct HomeView: View {
                 VStack {
                     // Profile button at top-right
                     HStack {
-                        NavigationLink(destination: TestView()) {
-                            Image(systemName: "ladybug.fill")
-                                .resizable()
-                                .foregroundColor(.orange.opacity(0.7))
-                                .frame(width: 30, height: 30)
-                        }
-                        
                         Spacer()
                         
                         NavigationLink(destination: ProfileView()) {
@@ -111,30 +104,45 @@ struct HomeView: View {
                     .padding(.vertical)
 
                     // Expense List
-                    List {
-                        ForEach(authVM.filteredExpenses) { expense in
-                            ExpenseRow(expense: expense, currencySymbol: authVM.selectedCurrency)
-                                .onTapGesture {
-                                    showEditExpense = expense
-                                }
-                                .swipeActions(edge: .trailing) {
-                                    Button(role: .destructive) {
-                                        if let index = authVM.expenses.firstIndex(where: { $0.id == expense.id }) {
-                                            authVM.deleteExpense(at: IndexSet(integer: index))
-                                            authVM.filterExpenses(by: authVM.selectedFilter)
-                                        }
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
+                    if authVM.isLoading {
+                        VStack {
+                            ProgressView()
+                                .scaleEffect(1.5)
+                                .padding()
+                            Text("Loading expenses...")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        List {
+                            ForEach(authVM.filteredExpenses) { expense in
+                                ExpenseRow(expense: expense, currencySymbol: authVM.selectedCurrency)
+                                    .onTapGesture {
+                                        showEditExpense = expense
                                     }
-                                }
-                                .listRowSeparator(.hidden)
-                                .listRowBackground(Color.clear)
+                                    .swipeActions(edge: .trailing) {
+                                        Button(role: .destructive) {
+                                            if let index = authVM.expenses.firstIndex(where: { $0.id == expense.id }) {
+                                                authVM.deleteExpense(at: IndexSet(integer: index))
+                                                authVM.filterExpenses(by: authVM.selectedFilter)
+                                            }
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
+                                    .listRowSeparator(.hidden)
+                                    .listRowBackground(Color.clear)
+                            }
+                        }
+                        .listStyle(.plain)
+                        .scrollContentBackground(.hidden)
+                        .background(Color.clear)
+                        .refreshable {
+                            // Pull to refresh functionality
+                            await authVM.loadUserData()
                         }
                     }
-                    .listStyle(.plain)
-
-                    .scrollContentBackground(.hidden)
-                    .background(Color.clear)
 
                     Spacer()
                 }
@@ -162,6 +170,12 @@ struct HomeView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            // Automatically refresh data when view appears
+            Task {
+                await authVM.loadUserData()
+            }
+        }
     }
 }
 
