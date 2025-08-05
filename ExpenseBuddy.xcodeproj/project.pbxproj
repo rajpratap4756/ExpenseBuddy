@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E202084F2E41E0AE0044AA2F /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = E202084E2E41E0AE0044AA2F /* README.md */; };
 		E2EF54292E3AE0DB00D96228 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = E2EF54282E3AE0DB00D96228 /* Auth */; };
 		E2EF542B2E3AE0DB00D96228 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = E2EF542A2E3AE0DB00D96228 /* Functions */; };
 		E2EF542D2E3AE0DB00D96228 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = E2EF542C2E3AE0DB00D96228 /* PostgREST */; };
@@ -33,6 +34,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E202084E2E41E0AE0044AA2F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E2EF53EA2E3AD30900D96228 /* ExpenseBuddy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ExpenseBuddy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E2EF53FA2E3AD30A00D96228 /* ExpenseBuddyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ExpenseBuddyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E2EF54042E3AD30A00D96228 /* ExpenseBuddyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ExpenseBuddyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -42,6 +44,11 @@
 		E20207CC2E3F7DF80044AA2F /* Profile */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Profile;
+			sourceTree = "<group>";
+		};
+		E20208502E41ECB20044AA2F /* Screenshots */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Screenshots;
 			sourceTree = "<group>";
 		};
 		E2EF53EC2E3AD30900D96228 /* ExpenseBuddy */ = {
@@ -124,6 +131,8 @@
 				E2EF53FD2E3AD30A00D96228 /* ExpenseBuddyTests */,
 				E2EF54072E3AD30A00D96228 /* ExpenseBuddyUITests */,
 				E2EF54492E3AE37500D96228 /* Frameworks */,
+				E202084E2E41E0AE0044AA2F /* README.md */,
+				E20208502E41ECB20044AA2F /* Screenshots */,
 				E2EF53EB2E3AD30900D96228 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -162,6 +171,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				E20207CC2E3F7DF80044AA2F /* Profile */,
+				E20208502E41ECB20044AA2F /* Screenshots */,
 				E2EF53EC2E3AD30900D96228 /* ExpenseBuddy */,
 				E2EF54172E3AD37C00D96228 /* Models */,
 				E2EF54192E3AD41100D96228 /* ViewModels */,
@@ -279,6 +289,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E202084F2E41E0AE0044AA2F /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
