@@ -55,17 +55,6 @@ struct AboutView: View {
                         Label("Licenses", systemImage: "doc.badge.gearshape")
                     }
                 }
-                
-                Section(header: Text("CREDITS")) {
-                    Link(destination: URL(string: "https://github.com/expensebuddy")!) {
-                        Label("GitHub Repository", systemImage: "chevron.left.forwardslash.chevron.right")
-                    }
-                    
-                    Text("© 2023 ExpenseBuddy. All rights reserved.")
-                        .font(.footnote)
-                        .foregroundColor(.gray)
-                        .padding(.vertical, 8)
-                }
             }
             .scrollContentBackground(.hidden) // Hides default List background
             .background(Color.clear)

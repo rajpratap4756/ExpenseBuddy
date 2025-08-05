@@ -134,6 +134,12 @@ class AuthViewModel: ObservableObject {
         }
     }
 
+    func updateCurrency(_ newCurrency: String) async {
+        guard var profile = userProfile else { return }
+        profile.currency = newCurrency
+        await updateUserProfile(profile)
+    }
+
     func uploadProfileImage(_ image: UIImage) async {
         guard let userId = SupabaseAuthService.shared.currentUser?.id.uuidString,
               let imageData = image.jpegData(compressionQuality: 0.8) else { return }

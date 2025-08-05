@@ -82,7 +82,14 @@ struct ProfileView: View {
                         Text("Currency Symbol")
                             .foregroundColor(.black)
                         Spacer()
-                        Picker("", selection: $authVM.selectedCurrency) {
+                        Picker("", selection: Binding(
+                            get: { authVM.selectedCurrency },
+                            set: { newCurrency in
+                                Task {
+                                    await authVM.updateCurrency(newCurrency)
+                                }
+                            }
+                        )) {
                             ForEach(authVM.availableCurrencies, id: \.self) {
                                 Text($0)
                                     .foregroundColor(.white)
