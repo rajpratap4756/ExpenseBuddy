@@ -8,7 +8,7 @@ import SwiftUI
 class AuthViewModel: ObservableObject {
     @Published var email = ""
     @Published var password = ""
-    @Published var isLoggedIn = false
+    @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
     @Published var errorMessage: String?
     @Published var shouldNavigateToLogin = false
     @Published var isOTPSent = false
@@ -26,6 +26,23 @@ class AuthViewModel: ObservableObject {
     private let expenseService = ExpenseService.shared
     private let profileService = ProfileService.shared
     private let offlineSyncService = OfflineSyncService.shared
+
+    init() {
+        Task {
+            await restoreSession()
+        }
+    }
+
+    func restoreSession() async {
+        // Check Supabase session validity and restore user
+        if let session = try? await SupabaseAuthService.shared.client.auth.session, let user = session.user as? User {
+            SupabaseAuthService.shared.currentUser = user
+            isLoggedIn = true
+            await loadUserData()
+        } else {
+            isLoggedIn = false
+        }
+    }
 
     // MARK: - Auth
     func login() {
