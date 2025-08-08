@@ -50,6 +50,38 @@ final class SupabaseAuthService: ObservableObject {
             type: .signup
         )
         
+        func sendPasswordResetOTP(email: String) async throws {
+            try await client.auth.signInWithOTP(
+                email: email,
+                shouldCreateUser: false
+            )
+        }
+
+           // MARK: - Verify OTP
+           func verifyOTP(email: String, otp: String) async throws {
+               let response = try await client.auth.verifyOTP(
+                   email: email,
+                   token: otp,
+                   type: .email // EmailOTPType enum
+               )
+               self.currentUser = response.user
+               self.otpToken = ""
+           }
+           
+           // MARK: - Verify OTP & Reset Password
+           func verifyOTPAndResetPassword(email: String, otp: String, newPassword: String) async throws {
+               // Step 1: Verify OTP
+               _ = try await client.auth.verifyOTP(
+                   email: email,
+                   token: otp,
+                   type: .email
+               )
+               // Step 2: Update password
+               try await client.auth.update(user: UserAttributes(password: newPassword))
+           }
+
+        
+
         if let user = verifyResponse.user as? User {
             DispatchQueue.main.async {
                 self.currentUser = user
@@ -70,7 +102,7 @@ final class SupabaseAuthService: ObservableObject {
     func getCurrentSession() async throws -> Session? {
         return try await client.auth.session
     }
-    
+
     
 }
 

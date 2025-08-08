@@ -4,11 +4,12 @@ struct LoginView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @State private var isEmailValid = true
     @State private var isPasswordValid = true
+    @State private var showForgotPassword = false
 
     var body: some View {
         NavigationStack {
             ZStack {
-                //  Background Gradient
+                // Background Gradient
                 LinearGradient(
                     gradient: Gradient(colors: [Color(hex: "#d6e4ff"), Color(hex: "#fbe0f8")]),
                     startPoint: .top,
@@ -65,7 +66,7 @@ struct LoginView: View {
                             .multilineTextAlignment(.center)
                     }
 
-                    //  Login Button with Gradient
+                    // Login Button
                     Button(action: {
                         if isValidEmail(authVM.email) && authVM.password.count >= 6 {
                             Task {
@@ -94,6 +95,18 @@ struct LoginView: View {
                     .disabled(!isValidForm)
                     .opacity(isValidForm ? 1 : 0.5)
 
+                    // Forgot Password Link
+                    Button(action: {
+                        showForgotPassword = true
+                    }) {
+                        Text("Forgot Password?")
+                            .font(.callout)
+                            .foregroundColor(.blue)
+                    }
+                    .padding(.top, 5)
+                    .fullScreenCover(isPresented: $showForgotPassword) {
+                        ForgotPasswordView()
+                    }
                     NavigationLink("Don't have an account? Sign Up", destination: SignupView())
                         .font(.callout)
                         .foregroundColor(.blue)
@@ -113,8 +126,6 @@ struct LoginView: View {
         return NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: email)
     }
 }
-
-// Extension for Hex to Color
 extension Color {
     init(hex: String) {
         let scanner = Scanner(string: hex.replacingOccurrences(of: "#", with: ""))
