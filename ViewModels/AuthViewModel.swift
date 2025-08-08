@@ -225,11 +225,35 @@ class AuthViewModel: ObservableObject {
 
     func deleteExpense(at offsets: IndexSet) {
         for index in offsets {
-            offlineSyncService.deleteExpenseOffline(id: expenses[index].id)
-            expenses.remove(at: index)
+            let expenseId = expenses[index].id
+            
+            // 1. Delete from Supabase
+            Task {
+                do {
+                    try await SupabaseAuthService.shared.client
+                        .from("expenses") // your table name
+                        .delete()
+                        .eq("id", value: expenseId.uuidString)
+                        .execute()
+                    
+                    // 2. Delete from offline storage
+                    offlineSyncService.deleteExpenseOffline(id: expenseId)
+                    
+                    // 3. Delete from local list (on main thread)
+                    await MainActor.run {
+                        expenses.remove(at: index)
+                        filterExpenses(by: selectedFilter)
+                    }
+                    
+                } catch {
+                    await MainActor.run {
+                        errorMessage = "Failed to delete expense: \(error.localizedDescription)"
+                    }
+                }
+            }
         }
-        filterExpenses(by: selectedFilter)
     }
+
 
     func filterExpenses(by filter: String) {
         selectedFilter = filter
