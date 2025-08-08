@@ -54,7 +54,7 @@ struct ForgotPasswordView: View {
                                 isEmailValid = isValidEmail(email)
                             }
                         
-                        if !isEmailValid {
+                        if !isEmailValid && !email.isEmpty {
                             Text("Please enter a valid email")
                                 .font(.caption)
                                 .foregroundColor(.red)
@@ -63,6 +63,8 @@ struct ForgotPasswordView: View {
                         actionButton("Send OTP") {
                             sendOTP()
                         }
+                        .disabled(!isValidEmail(email) || isLoading) // disable if invalid
+                        .opacity(!isValidEmail(email) || isLoading ? 0.5 : 1.0)
                         
                     case .enterOTP:
                         TextField("Enter OTP code", text: $otpCode)
@@ -72,6 +74,8 @@ struct ForgotPasswordView: View {
                         actionButton("Verify OTP") {
                             verifyOTP()
                         }
+                        .disabled(otpCode.isEmpty || isLoading)
+                        .opacity(otpCode.isEmpty || isLoading ? 0.5 : 1.0)
                         
                     case .enterNewPassword:
                         SecureField("New Password", text: $newPassword)
@@ -80,7 +84,7 @@ struct ForgotPasswordView: View {
                         SecureField("Confirm Password", text: $confirmPassword)
                             .textFieldStyle(.roundedBorder)
                         
-                        if newPassword != confirmPassword && !newPassword.isEmpty {
+                        if newPassword != confirmPassword && !confirmPassword.isEmpty {
                             Text("Passwords do not match")
                                 .font(.caption)
                                 .foregroundColor(.red)
@@ -89,6 +93,8 @@ struct ForgotPasswordView: View {
                         actionButton("Update Password") {
                             updatePassword()
                         }
+                        .disabled(newPassword.isEmpty || confirmPassword.isEmpty || newPassword != confirmPassword || isLoading)
+                        .opacity(newPassword.isEmpty || confirmPassword.isEmpty || newPassword != confirmPassword || isLoading ? 0.5 : 1.0)
                     }
                     
                     Spacer()
